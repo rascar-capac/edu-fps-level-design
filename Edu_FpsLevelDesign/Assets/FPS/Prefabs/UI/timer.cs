@@ -8,17 +8,27 @@ public class timer : MonoBehaviour
     private TextMeshProUGUI m_TextMeshPro;
     private float m_Time;
     public float bestScore;
+    private bool win = false;
 
     void Start()
     {
         m_TextMeshPro = GetComponentInChildren<TextMeshProUGUI>();
-        bestScore = PlayerPrefs.GetFloat("score");
+        EventManager.AddListener<AllObjectivesCompletedEvent>(OnAllObjectivesCompleted);
+        if (bestScore < 0)
+        {
+            PlayerPrefs.DeleteAll();
+            PlayerPrefs.Save();
+        }
+        else
+        {
+            bestScore = PlayerPrefs.GetFloat("score");
+        }
         if (bestScore == 0) bestScore = 10000000000;
     }
 
     void Update()
     {
-        if (!Cursor.visible)
+        if (!win)
         {
             m_Time += Time.deltaTime;
             m_TextMeshPro.text = GenTimeSpanFromSeconds(m_Time);
@@ -37,5 +47,9 @@ public class timer : MonoBehaviour
     {
         string timeInterval = TimeSpan.FromSeconds(seconds).ToString();
         return timeInterval.Substring(0, timeInterval.Length - 4);
+    }
+    void OnAllObjectivesCompleted(AllObjectivesCompletedEvent evt)
+    {
+        win = true;
     }
 }
